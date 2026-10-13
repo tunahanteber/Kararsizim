@@ -1,4 +1,5 @@
 import os
+import sys
 from pathlib import Path
 
 import dj_database_url
@@ -82,11 +83,20 @@ SESSION_COOKIE_SAMESITE = "Lax"
 
 LOGIN_URL = "/giris/"
 LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
 
 # --- Veritabanı (bkz. KARARSIZIM.md Bölüm 9.4; bu ayarları değiştirme) ---
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
-if DATABASE_URL:
+if "test" in sys.argv:
+    # Testler her zaman lokal SQLite ile çalışır; Supabase'e test DB'si açılmaz.
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
+elif DATABASE_URL:
     DATABASES = {
         "default": dj_database_url.parse(
             DATABASE_URL,

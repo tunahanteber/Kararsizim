@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Giriş · kararsızım{% endblock %}
+{% block content %}
+  <section class="card">
+    <h1>Tekrar hoş geldin</h1>
+    <form method="post" class="form" novalidate>
+      {% csrf_token %}
+      {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+      {% include "accounts/_form.html" %}
+      <button type="submit" class="btn btn-brand btn-block">Giriş yap</button>
+    </form>
+    <p class="muted">Hesabın yok mu? <a href="/kayit/{% if next %}?next={{ next|urlencode }}{% endif %}">Kayıt ol</a></p>
+  </section>
+{% endblock %}

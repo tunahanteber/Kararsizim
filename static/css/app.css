@@ -67,3 +67,35 @@ a { color: inherit; }
 .hero p { margin: 0; color: var(--ink-soft); }
 
 .wordmark-i { color: var(--brand); display: inline-block; transform: skewX(-8deg); }
+
+.card {
+  background: var(--surface); border: 2px solid var(--line);
+  border-radius: var(--radius-lg); padding: 24px;
+}
+.card h1 { margin: 0 0 8px; font-size: 26px; }
+.muted { color: var(--ink-soft); }
+.form { display: grid; gap: 16px; margin: 16px 0; }
+.field label { display: block; font-weight: 600; margin-bottom: 6px; }
+.field input {
+  width: 100%; min-height: 48px; padding: 0 14px; font: inherit; color: var(--ink);
+  background: var(--bg); border: 2px solid var(--line); border-radius: var(--radius-md);
+}
+.field input:focus { outline: none; border-color: var(--brand); background: var(--brand-tint); }
+.field-hint { margin: 6px 0 0; font-size: 13px; color: var(--ink-soft); }
+.field-hint.is-ok { color: #0B7A58; }
+.field-hint.is-bad { color: #C2262E; }
+.field-error { margin: 6px 0 0; font-size: 14px; font-weight: 600; color: #C2262E; }
+.form-errors { background: var(--opt-1-tint); border-radius: var(--radius-md); padding: 10px 14px; color: #8A1C21; }
+.form-errors ul { margin: 0; padding: 0; list-style: none; }
+.btn-block { width: 100%; font: inherit; font-weight: 600; cursor: pointer; }
+.inline-form { margin: 0; }
+.link-btn { background: none; border: 0; padding: 0; font: inherit; font-weight: 600; cursor: pointer; color: var(--ink-soft); }
+
+.toasts { position: fixed; left: 0; right: 0; bottom: 16px; display: grid; gap: 8px; justify-items: center; padding: 0 16px; pointer-events: none; }
+.toast {
+  background: var(--ink); color: #fff; padding: 12px 18px; border-radius: var(--radius-pill);
+  font-weight: 600; animation: toast-in .3s ease-out, toast-out .4s ease-in 3.6s forwards;
+}
+@keyframes toast-in { from { transform: translateY(16px); opacity: 0; } }
+@keyframes toast-out { to { transform: translateY(16px); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .toast { animation: toast-out .01s 4s forwards; } }

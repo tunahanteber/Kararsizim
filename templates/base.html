@@ -15,6 +15,7 @@
     <nav class="topnav">
       {% if user.is_authenticated %}
         <span class="topnav-user">@{{ user.username }}</span>
+        <form method="post" action="/cikis/" class="inline-form">{% csrf_token %}<button type="submit" class="link-btn">Çıkış</button></form>
       {% else %}
         <a href="/giris/">Giriş</a>
       {% endif %}
@@ -24,6 +25,11 @@
   <main class="container">
     {% block content %}{% endblock %}
   </main>
+  {% if messages %}
+    <div class="toasts" aria-live="polite">
+      {% for message in messages %}<div class="toast toast-{{ message.tags }}">{{ message }}</div>{% endfor %}
+    </div>
+  {% endif %}
   <script src="{% static 'js/app.js' %}" defer></script>
 </body>
 </html>
