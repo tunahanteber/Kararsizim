@@ -1,0 +1,29 @@
+{% load static %}<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}kararsızım{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head>
+<body>
+  <header class="topbar">
+    <a class="wordmark" href="/" aria-label="kararsızım">kararsız<span class="wordmark-i">ı</span>m</a>
+    <nav class="topnav">
+      {% if user.is_authenticated %}
+        <span class="topnav-user">@{{ user.username }}</span>
+      {% else %}
+        <a href="/giris/">Giriş</a>
+      {% endif %}
+      <a class="btn btn-brand" href="/yeni/">Anket aç</a>
+    </nav>
+  </header>
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+  <script src="{% static 'js/app.js' %}" defer></script>
+</body>
+</html>
