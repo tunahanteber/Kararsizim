@@ -10,6 +10,9 @@ load_dotenv(BASE_DIR / ".env")  # lokal; Vercel'de dosya yok, sorun değil
 
 SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]  # yoksa açıkça patlasın
 DEBUG = os.environ.get("DJANGO_DEBUG", "0") == "1"
+# Yalnızca LOKAL: DEBUG kapalıyken (DJANGO_DEBUG=0) siteyi http://localhost üzerinde denemek için.
+# `Secure` çerezleri kapatır ve DATABASE_URL yoksa SQLite'a izin verir. Vercel'de (VERCEL=1) yok sayılır.
+LOCAL_HTTP = os.environ.get("DJANGO_LOCAL_HTTP") == "1" and not os.environ.get("VERCEL")
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", ".vercel.app"]
 CSRF_TRUSTED_ORIGINS = ["https://*.vercel.app"]
@@ -130,7 +133,7 @@ elif DATABASE_URL:
         "prepare_threshold": None,
     }
     DATABASES["default"]["DISABLE_SERVER_SIDE_CURSORS"] = True
-elif DEBUG:
+elif DEBUG or LOCAL_HTTP:
     # Sadece lokal geliştirme için
     DATABASES = {
         "default": {
@@ -145,6 +148,6 @@ else:
 
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = not LOCAL_HTTP
+    CSRF_COOKIE_SECURE = not LOCAL_HTTP
     SECURE_CONTENT_TYPE_NOSNIFF = True
