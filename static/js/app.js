@@ -196,9 +196,19 @@
         headers: { "Accept": "application/json", "X-CSRFToken": csrf ? csrf.value : "" },
         body: body
       }).then(function (r) {
+        if (r.status === 429 || r.status === 409) {
+          // Bilinen, kullanıcıya söylenecek durumlar: formu normal akışa düşürme
+          return r.json().then(function (d) {
+            form.classList.remove("is-busy");
+            toast(d.error || "İşlem yapılamadı.", "error");
+            if (r.status === 409) setTimeout(function () { location.reload(); }, 1200);
+            return null;
+          });
+        }
         if (!r.ok) throw new Error("http " + r.status);
         return r.json();
       }).then(function (d) {
+        if (!d) return;
         var root = form.closest("[data-poll-detail]");
         showResults(root, d);
         toast(d.already_voted ? "Zaten oy verdin, işte sonuçlar." : "Oyun kaydedildi! 🎉");

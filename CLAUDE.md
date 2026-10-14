@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Source of truth
 
-`docs/KARARSIZIM.md` (Turkish) is the full spec: data model, business rules, design system, Vercel/Supabase setup, and the phase roadmap (Faz 0–5). Read it before changing anything. **Implement only the phase the user asks for; don't start the next one.** Current state: Faz 0, 2, 3, 4 done. Faz 1 is partly done (Supabase project, RLS migrations, `vercel.json`, `/saglik/` exist); the Vercel project/env setup and Data API toggle are still pending (user deferred them).
+`docs/KARARSIZIM.md` (Turkish) is the full spec: data model, business rules, design system, Vercel/Supabase setup, and the phase roadmap (Faz 0–5). Read it before changing anything. **Implement only the phase the user asks for; don't start the next one.** Current state: Faz 0, 2, 3, 4 done; Faz 5 done except password reset and Turnstile (need external services). Faz 1 is partly done (Supabase project, RLS migrations, `vercel.json`, `/saglik/` exist); the Vercel project/env setup and Data API toggle are still pending (user deferred them).
 
 ## Commands
 
@@ -35,3 +35,5 @@ Settings require `DJANGO_SECRET_KEY` (loaded from a git-ignored `.env`; see `.en
 - Every migration that adds tables must be followed by a migration calling `config.rls.enable_rls` (see `polls/migrations/0002_enable_rls.py`).
 - Vote results are only computed/rendered for users allowed to see them (`services.can_see_results`); the vote form posts the option `position` (0-4), never internal IDs. Voting works without JS; `static/js/app.js` upgrades it to fetch+JSON and falls back to a normal form post.
 - CSS/JS URLs carry `?v=<mtime>` (`config/context_processors.py`) so browsers don't serve stale assets.
+- Rate limiting (`polls/ratelimit.py`, limits in `settings.RATE_LIMITS`) uses Django's `DatabaseCache` (`django_cache` table, created by `polls` migration 0004 + RLS) — in-memory caches don't work on serverless. Tests run against SQLite, so the cache table exists there too.
+- Closed polls (`Poll.closed_at`) reject votes (409/redirect) and show results to everyone; reports (`polls.Report`) are visible only in Django admin. Dark mode is CSS-only via `prefers-color-scheme` (tokens in `static/css/app.css`; contrast ratios were computed for AA).

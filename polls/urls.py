@@ -10,5 +10,7 @@ urlpatterns = [
     re_path(rf"^a/{CODE}/$", views.detail, name="poll_detail"),
     re_path(rf"^a/{CODE}/oy/$", views.vote, name="poll_vote"),
     re_path(rf"^a/{CODE}/sil/$", views.delete, name="poll_delete"),
+    re_path(rf"^a/{CODE}/kapat/$", views.close, name="poll_close"),
+    re_path(rf"^a/{CODE}/sikayet/$", views.report, name="poll_report"),
     path("u/<str:username>/", views.profile, name="profile"),
 ]

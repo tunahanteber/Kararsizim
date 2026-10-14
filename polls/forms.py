@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import LEVELS
+from .models import LEVELS, Report
 from .services import MAX_OPTIONS, MIN_OPTIONS, normalize_option_text
 
 
@@ -48,3 +48,11 @@ class PollForm(forms.Form):
     @property
     def option_fields(self):
         return [self[f"option_{i}"] for i in range(MAX_OPTIONS)]
+
+
+class ReportForm(forms.Form):
+    reason = forms.ChoiceField(label="Neden?", choices=Report.REASONS)
+    note = forms.CharField(
+        label="Not (opsiyonel)", max_length=200, required=False, strip=True,
+        widget=forms.TextInput(attrs={"placeholder": "Kısaca anlat (opsiyonel)"}),
+    )

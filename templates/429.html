@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Çok hızlı · kararsızım{% endblock %}
+{% block content %}
+  <section class="card error-page">
+    <p class="error-emoji" aria-hidden="true">🐢</p>
+    <h1>Biraz yavaşla</h1>
+    <p class="muted">Kısa sürede çok fazla istek gönderdin. Bir dakika bekleyip tekrar dene.</p>
+    <p><a class="btn btn-brand" href="javascript:history.back()">Geri dön</a></p>
+  </section>
+{% endblock %}

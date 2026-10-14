@@ -6,8 +6,9 @@ import secrets
 from django.conf import settings
 from django.db import IntegrityError, transaction
 from django.db.models import Count
+from django.utils import timezone
 
-from .models import Option, Poll, Vote
+from .models import Option, Poll, Report, Vote
 
 CODE_ALPHABET = "23456789abcdefghjkmnpqrstuvwxyz"
 CODE_LENGTH = 12
@@ -84,10 +85,22 @@ def get_user_vote(request, poll):
     return Vote.objects.filter(poll=poll, **flt).select_related("option").first()
 
 
+class PollClosed(Exception):
+    """Kapalı ankete oy verilmeye çalışıldı."""
+
+
+def close_poll(poll):
+    if poll.closed_at is None:
+        poll.closed_at = timezone.now()
+        poll.save(update_fields=["closed_at"])
+
+
 def cast_vote(request, poll, option):
     """Oy kaydeder. (vote, already_voted) döner."""
     if option.poll_id != poll.id:
         raise ValueError("Seçenek bu ankete ait değil.")
+    if poll.is_closed:
+        raise PollClosed
 
     if request.user.is_authenticated:
         identity = {"user": request.user}
@@ -104,6 +117,9 @@ def cast_vote(request, poll, option):
 
 
 def can_see_results(request, poll) -> bool:
+    # Kapalı ankette yeni oy gelmeyeceği için sürü etkisi kalmaz: sonuçlar herkese açık.
+    if poll.is_closed:
+        return True
     if request.user.is_authenticated and poll.author_id == request.user.id:
         return True
     return get_user_vote(request, poll) is not None
@@ -179,7 +195,7 @@ def attach_feed_state(request, polls):
         voted = dict(rows)
 
     user_id = request.user.id if request.user.is_authenticated else None
-    visible = [p for p in polls if p.id in voted or p.author_id == user_id]
+    visible = [p for p in polls if p.id in voted or p.author_id == user_id or p.is_closed]
     counts = {}
     if visible:
         for poll_id, option_id, c in (
@@ -195,3 +211,25 @@ def attach_feed_state(request, polls):
             build_results(p.options.all(), counts.get(p.id, {})) if p in visible else None
         )
     return polls
+
+
+def exclude_voted(request, queryset):
+    """Akış filtresi: kullanıcının (veya bu oturumun) henüz oy vermediği, açık anketler."""
+    queryset = queryset.filter(closed_at__isnull=True)
+    flt = _identity_filter(request)
+    if flt is None:
+        return queryset
+    return queryset.exclude(pk__in=Vote.objects.filter(**flt).values("poll_id"))
+
+
+def report_poll(request, poll, reason, note=""):
+    """Şikâyet kaydeder. (report, already_reported) döner."""
+    if request.user.is_authenticated:
+        identity = {"reporter": request.user}
+    else:
+        identity = {"reporter_hash": anon_voter_hash(request)}
+    try:
+        with transaction.atomic():
+            return Report.objects.create(poll=poll, reason=reason, note=note.strip()[:200], **identity), False
+    except IntegrityError:
+        return Report.objects.filter(poll=poll, **identity).first(), True

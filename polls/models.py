@@ -19,6 +19,7 @@ class Poll(models.Model):
     details = models.CharField(max_length=300, blank=True)
     indecision_level = models.PositiveSmallIntegerField(default=2)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    closed_at = models.DateTimeField(null=True, blank=True)  # doluysa anket kapalı: yeni oy alınmaz
 
     class Meta:
         ordering = ["-created_at"]
@@ -30,6 +31,10 @@ class Poll(models.Model):
 
     def __str__(self):
         return self.question
+
+    @property
+    def is_closed(self):
+        return self.closed_at is not None
 
     @property
     def level_label(self):
@@ -85,3 +90,44 @@ class Vote(models.Model):
                 name="vote_exactly_one_identity",
             ),
         ]
+
+
+class Report(models.Model):
+    """Şikâyet: yalnızca Django admin'de görülür; herkese açık hiçbir yerde gösterilmez."""
+
+    REASONS = [
+        ("spam", "Spam / reklam"),
+        ("uygunsuz", "Uygunsuz içerik"),
+        ("taciz", "Hakaret / taciz"),
+        ("diger", "Diğer"),
+    ]
+
+    poll = models.ForeignKey(Poll, on_delete=models.CASCADE, related_name="reports")
+    reason = models.CharField(max_length=12, choices=REASONS)
+    note = models.CharField(max_length=200, blank=True)
+    reporter = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.CASCADE, related_name="+"
+    )
+    reporter_hash = models.CharField(max_length=64, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["poll", "reporter"], condition=Q(reporter__isnull=False), name="uniq_report_per_user"
+            ),
+            models.UniqueConstraint(
+                fields=["poll", "reporter_hash"], condition=Q(reporter_hash__isnull=False), name="uniq_report_per_anon"
+            ),
+            models.CheckConstraint(
+                condition=(
+                    Q(reporter__isnull=False, reporter_hash__isnull=True)
+                    | Q(reporter__isnull=True, reporter_hash__isnull=False)
+                ),
+                name="report_exactly_one_identity",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.get_reason_display()} · {self.poll}"

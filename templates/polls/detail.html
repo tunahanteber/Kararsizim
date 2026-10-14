@@ -33,7 +33,9 @@
       {% endif %}
     </div>
 
-    {% if voted_position is None %}
+    {% if poll.is_closed %}
+      <p class="closed-note"><span aria-hidden="true">🔒</span> Bu anket kapandı. Artık yeni oy almıyor, sonuçlar herkese açık.</p>
+    {% elif voted_position is None %}
       {% if data %}<p class="muted small" data-owner-note>Bu senin anketin, sonuçları görüyorsun. İstersen sen de oy verebilirsin.</p>{% endif %}
       <form method="post" action="{% url 'poll_vote' code=poll.code %}" class="vote-form" data-vote-form>
         {% csrf_token %}
@@ -50,11 +52,37 @@
     <div class="actions">
       <button type="button" class="btn btn-ghost" data-share data-url="{{ request.build_absolute_uri }}" data-title="{{ poll.question }}">Paylaş</button>
       {% if is_owner %}
+        {% if not poll.is_closed %}
+          <form method="post" action="{% url 'poll_close' code=poll.code %}" data-confirm="Anketi kapatırsan yeni oy alamaz. Emin misin?">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-ghost">Anketi kapat</button>
+          </form>
+        {% endif %}
         <form method="post" action="{% url 'poll_delete' code=poll.code %}" data-confirm="Bu anketi silmek istediğine emin misin?">
           {% csrf_token %}
           <button type="submit" class="btn btn-danger">Sil</button>
         </form>
       {% endif %}
     </div>
+
+    {% if not is_owner %}
+      <details class="report">
+        <summary>Şikâyet et</summary>
+        <form method="post" action="{% url 'poll_report' code=poll.code %}" class="form report-form">
+          {% csrf_token %}
+          <div class="field">
+            <label for="report-reason">{{ report_form.reason.label }}</label>
+            <select name="reason" id="report-reason" required>
+              {% for value, label in report_form.reason.field.choices %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="field">
+            <label for="report-note">{{ report_form.note.label }}</label>
+            <input type="text" name="note" id="report-note" maxlength="200" placeholder="Kısaca anlat (opsiyonel)">
+          </div>
+          <button type="submit" class="btn btn-ghost">Şikâyeti gönder</button>
+        </form>
+      </details>
+    {% endif %}
   </article>
 {% endblock %}

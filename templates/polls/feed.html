@@ -2,9 +2,14 @@
 {% block title %}kararsızım · Kararsız kaldığın şeyi topluluğa sor{% endblock %}
 {% block content %}
   <h1 class="sr-only">Anketler</h1>
-  <div class="tabs" role="tablist">
-    <a class="tab{% if not popular %} is-active{% endif %}" href="/">Yeni</a>
-    <a class="tab{% if popular %} is-active{% endif %}" href="/?sirala=populer">Popüler</a>
-  </div>
-  {% include "partials/poll_list.html" with empty_text="Henüz kimse kararsız değil… İlk sen ol." %}
+  <nav class="tabs" aria-label="Akış filtresi">
+    <a class="tab{% if not popular and not unvoted %} is-active{% endif %}" href="/"{% if not popular and not unvoted %} aria-current="page"{% endif %}>Yeni</a>
+    <a class="tab{% if popular %} is-active{% endif %}" href="/?sirala=populer"{% if popular %} aria-current="page"{% endif %}>Popüler</a>
+    <a class="tab{% if unvoted %} is-active{% endif %}" href="/?filtre=oy-vermediklerim"{% if unvoted %} aria-current="page"{% endif %}>Oy vermediklerim</a>
+  </nav>
+  {% if unvoted %}
+    {% include "partials/poll_list.html" with empty_text="Hepsine oy vermişsin! Kararsız olmayan bir kararsız. 🎉" %}
+  {% else %}
+    {% include "partials/poll_list.html" with empty_text="Henüz kimse kararsız değil… İlk sen ol." %}
+  {% endif %}
 {% endblock %}

@@ -84,6 +84,23 @@ SESSION_COOKIE_AGE = 60 * 60 * 24 * 365
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = "Lax"
 
+# Rate limit için DB tabanlı cache (serverless'ta bellek içi cache örnekler arası paylaşılmaz).
+# Tablo `polls` migration'ıyla oluşur (createcachetable); elle çalıştırmaya gerek yok.
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+        "LOCATION": "django_cache",
+        "OPTIONS": {"MAX_ENTRIES": 20000, "CULL_FREQUENCY": 3},
+    }
+}
+
+# scope: (en fazla istek, pencere saniye) — IP başına
+RATE_LIMITS = {
+    "vote": (20, 60),       # dakikada 20 oy
+    "poll": (10, 3600),     # saatte 10 anket
+    "report": (5, 3600),    # saatte 5 şikâyet
+}
+
 LOGIN_URL = "/giris/"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"

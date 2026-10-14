@@ -363,3 +363,189 @@ class Faz4Tests(TestCase):
         self.assertIn("favicon.svg", html)
         self.assertIn('href="#icerik"', html)
         self.assertRegex(html, r"app\.css\?v=\d+")
+
+
+class RateLimitTests(TestCase):
+    def setUp(self):
+        self.author = make_user("yazar")
+        self.poll = make_poll(self.author)
+
+    def vote(self, ip="10.0.0.1", json=True):
+        extra = {"HTTP_X_FORWARDED_FOR": ip}
+        if json:
+            extra["HTTP_ACCEPT"] = "application/json"
+        return self.client.post(reverse("poll_vote", args=[self.poll.code]), {"option": 0}, **extra)
+
+    def test_vote_limit_per_ip(self):
+        from django.test import override_settings
+        with override_settings(RATE_LIMITS={**__import__("django.conf").conf.settings.RATE_LIMITS, "vote": (3, 60)}):
+            codes = [self.vote().status_code for _ in range(5)]
+            self.assertEqual(codes, [200, 200, 200, 429, 429])
+            body = self.vote().json()
+            self.assertFalse(body["ok"])
+            self.assertIn("bekle", body["error"])
+            self.assertEqual(self.vote(ip="10.0.0.2").status_code, 200)  # başka IP etkilenmez
+
+    def test_vote_limit_form_shows_friendly_page(self):
+        from django.test import override_settings
+        with override_settings(RATE_LIMITS={"vote": (1, 60), "poll": (10, 3600), "report": (5, 3600)}):
+            self.vote(json=False)
+            r = self.vote(json=False)
+            self.assertContains(r, "Biraz yavaşla", status_code=429)
+
+    def test_poll_creation_limit(self):
+        from django.test import override_settings
+        self.client.force_login(self.author)
+        data = {"question": "Yeni bir soru mu?", "indecision_level": "2", "option_0": "A", "option_1": "B"}
+        with override_settings(RATE_LIMITS={"vote": (20, 60), "poll": (2, 3600), "report": (5, 3600)}):
+            before = Poll.objects.count()
+            codes = [self.client.post(reverse("poll_create"), data).status_code for _ in range(3)]
+            self.assertEqual(codes, [302, 302, 429])
+            self.assertEqual(Poll.objects.count(), before + 2)
+
+    def test_raw_ip_not_stored_in_cache(self):
+        from django.db import connection
+        self.vote(ip="203.0.113.77")
+        with connection.cursor() as cur:
+            cur.execute("SELECT cache_key FROM django_cache")
+            keys = [row[0] for row in cur.fetchall()]
+        self.assertTrue(any("rl:vote:" in k for k in keys))
+        self.assertFalse(any("203.0.113.77" in k for k in keys))
+
+
+class ClosePollTests(TestCase):
+    def setUp(self):
+        self.author = make_user("yazar")
+        self.poll = make_poll(self.author)
+        from django.test import Client
+        Client().post(reverse("poll_vote", args=[self.poll.code]), {"option": 0})
+
+    def test_owner_closes_others_cannot(self):
+        self.client.force_login(make_user("baskasi"))
+        self.assertEqual(self.client.post(reverse("poll_close", args=[self.poll.code])).status_code, 403)
+        self.client.force_login(self.author)
+        self.assertEqual(self.client.get(reverse("poll_close", args=[self.poll.code])).status_code, 405)
+        r = self.client.post(reverse("poll_close", args=[self.poll.code]))
+        self.assertRedirects(r, f"/a/{self.poll.code}/", fetch_redirect_response=False)
+        self.poll.refresh_from_db()
+        self.assertTrue(self.poll.is_closed)
+
+    def test_anonymous_cannot_close(self):
+        self.assertEqual(self.client.post(reverse("poll_close", args=[self.poll.code])).status_code, 302)
+        self.poll.refresh_from_db()
+        self.assertFalse(self.poll.is_closed)
+
+    def test_closed_poll_rejects_votes(self):
+        services.close_poll(self.poll)
+        r = self.client.post(reverse("poll_vote", args=[self.poll.code]), {"option": 1}, HTTP_ACCEPT="application/json")
+        self.assertEqual(r.status_code, 409)
+        r2 = self.client.post(reverse("poll_vote", args=[self.poll.code]), {"option": 1})
+        self.assertRedirects(r2, f"/a/{self.poll.code}/", fetch_redirect_response=False)
+        self.assertEqual(Vote.objects.count(), 1)
+
+    def test_closed_poll_results_public_and_no_vote_form(self):
+        html = self.client.get(f"/a/{self.poll.code}/").content.decode()
+        self.assertNotIn("%100", html)  # açıkken oy vermeyen göremez
+        services.close_poll(self.poll)
+        html = self.client.get(f"/a/{self.poll.code}/").content.decode()
+        self.assertIn("%100", html)
+        self.assertIn("Bu anket kapandı", html)
+        self.assertNotIn("data-vote-form", html)
+        self.assertIn("Kapandı", self.client.get("/").content.decode())
+
+    def test_close_is_idempotent(self):
+        services.close_poll(self.poll)
+        first = Poll.objects.get(pk=self.poll.pk).closed_at
+        services.close_poll(Poll.objects.get(pk=self.poll.pk))
+        self.assertEqual(Poll.objects.get(pk=self.poll.pk).closed_at, first)
+
+
+class UnvotedFilterTests(TestCase):
+    def test_filter_excludes_voted_and_closed(self):
+        author = make_user("yazar")
+        voted = make_poll(author, question="Oy verdiğim soru?")
+        fresh = make_poll(author, question="Henüz oy vermediğim soru?")
+        closed = make_poll(author, question="Kapalı olan soru?")
+        services.close_poll(closed)
+        self.client.post(reverse("poll_vote", args=[voted.code]), {"option": 0})
+        html = self.client.get("/?filtre=oy-vermediklerim").content.decode()
+        self.assertIn("Henüz oy vermediğim soru?", html)
+        self.assertNotIn("Oy verdiğim soru?", html)
+        self.assertNotIn("Kapalı olan soru?", html)
+        self.assertIn('aria-current="page"', html)
+
+    def test_filter_for_logged_in_user_and_pager_keeps_param(self):
+        author = make_user("yazar")
+        voter = make_user("oyuncu")
+        polls = [make_poll(author, question=f"Soru numara {i}?") for i in range(23)]
+        self.client.force_login(voter)
+        self.client.post(reverse("poll_vote", args=[polls[0].code]), {"option": 0})
+        r = self.client.get("/?filtre=oy-vermediklerim")
+        self.assertEqual(r.context["page"].paginator.count, 22)
+        self.assertContains(r, "filtre=oy-vermediklerim&amp;sayfa=2")
+
+    def test_empty_state(self):
+        self.assertContains(self.client.get("/?filtre=oy-vermediklerim"), "Hepsine oy vermişsin")
+
+
+class ReportTests(TestCase):
+    def setUp(self):
+        self.author = make_user("yazar", "gizli.yazar@example.com")
+        self.poll = make_poll(self.author)
+
+    def report(self, **data):
+        payload = {"reason": "spam", "note": "reklam bu"}
+        payload.update(data)
+        return self.client.post(reverse("poll_report", args=[self.poll.code]), payload)
+
+    def test_anonymous_report_and_duplicate(self):
+        r = self.report()
+        self.assertRedirects(r, f"/a/{self.poll.code}/", fetch_redirect_response=False)
+        self.assertEqual(self.poll.reports.count(), 1)
+        rep = self.poll.reports.get()
+        self.assertIsNone(rep.reporter)
+        self.assertEqual(len(rep.reporter_hash), 64)
+        self.report()
+        self.assertEqual(self.poll.reports.count(), 1)
+
+    def test_member_report(self):
+        user = make_user("sikayetci")
+        self.client.force_login(user)
+        self.report(reason="taciz")
+        self.assertEqual(self.poll.reports.get().reporter, user)
+
+    def test_owner_cannot_report_own_poll(self):
+        self.client.force_login(self.author)
+        self.assertEqual(self.report().status_code, 403)
+        self.assertEqual(self.poll.reports.count(), 0)
+
+    def test_invalid_reason_rejected(self):
+        self.report(reason="olmayan")
+        self.assertEqual(self.poll.reports.count(), 0)
+
+    def test_report_data_never_public(self):
+        self.report(note="çok gizli not")
+        for url in ("/", f"/a/{self.poll.code}/", "/u/yazar/"):
+            html = self.client.get(url).content.decode()
+            self.assertNotIn("çok gizli not", html)
+            self.assertNotIn("gizli.yazar@example.com", html)
+
+    def test_report_form_hidden_for_owner_visible_for_others(self):
+        self.assertContains(self.client.get(f"/a/{self.poll.code}/"), "Şikâyet et")
+        self.client.force_login(self.author)
+        self.assertNotContains(self.client.get(f"/a/{self.poll.code}/"), "Şikâyet et")
+
+    def test_report_rate_limit(self):
+        from django.test import override_settings
+        with override_settings(RATE_LIMITS={"vote": (20, 60), "poll": (10, 3600), "report": (1, 3600)}):
+            self.report()
+            self.report(reason="taciz")
+        self.assertEqual(self.poll.reports.count(), 1)
+
+    def test_report_db_constraints(self):
+        from .models import Report
+        Report.objects.create(poll=self.poll, reason="spam", reporter_hash="h" * 64)
+        with self.assertRaises(IntegrityError), transaction.atomic():
+            Report.objects.create(poll=self.poll, reason="spam", reporter_hash="h" * 64)
+        with self.assertRaises(IntegrityError), transaction.atomic():
+            Report.objects.create(poll=self.poll, reason="spam")  # kimlik yok

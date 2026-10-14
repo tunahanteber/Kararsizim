@@ -5,7 +5,7 @@
 {% endfor %}
 {% if page.has_other_pages %}
   <nav class="pager" aria-label="Sayfalar">
-    {% if page.has_previous %}<a class="btn btn-ghost" href="?{% if popular %}sirala=populer&{% endif %}sayfa={{ page.previous_page_number }}">← Yeniler</a>{% endif %}
-    {% if page.has_next %}<a class="btn btn-ghost" href="?{% if popular %}sirala=populer&{% endif %}sayfa={{ page.next_page_number }}">Daha fazla →</a>{% endif %}
+    {% if page.has_previous %}<a class="btn btn-ghost" href="?{{ base_qs }}sayfa={{ page.previous_page_number }}">← Yeniler</a>{% endif %}
+    {% if page.has_next %}<a class="btn btn-ghost" href="?{{ base_qs }}sayfa={{ page.next_page_number }}">Daha fazla →</a>{% endif %}
   </nav>
 {% endif %}
