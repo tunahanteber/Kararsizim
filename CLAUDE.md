@@ -25,7 +25,7 @@ Settings require `DJANGO_SECRET_KEY` (loaded from a git-ignored `.env`; see `.en
 ## Architecture notes
 
 - Django 5.2, server-rendered templates, plain HTML/CSS/vanilla JS — no npm, no build step, no JS/CSS frameworks. Don't add dependencies beyond `requirements.txt` without asking.
-- `accounts.User` is a custom `AbstractUser` (`AUTH_USER_MODEL`): login by **email**, public identity is lowercase `username` (validated by `validate_username`, reserved names, case-insensitive unique constraint). Email must never be rendered anywhere.
+- `accounts.User` is a custom `AbstractUser` (`AUTH_USER_MODEL`): login by **email or username** (`LoginForm` maps a username to its email; the error message never reveals which exists), public identity is lowercase `username` (validated by `validate_username`, reserved names, case-insensitive unique constraint). Email must never be rendered anywhere.
 - `polls` app holds polls/options/votes. Business logic (voting, results, verdict, code generation) belongs in `polls/services.py`; keep views thin.
 - Deliberate deviation from the spec: in `config/settings.py`, when `DATABASE_URL` is unset and `DEBUG` is off, `DATABASES` uses the `dummy` backend (no silent SQLite fallback on Vercel; `collectstatic` still works at build).
 - The `DATABASE_URL` branch in settings is tuned for Supabase's transaction pooler on serverless (`conn_max_age=0`, `prepare_threshold=None`, `DISABLE_SERVER_SIDE_CURSORS`). Do not change these (spec rule, Bölüm 9.4/13).
