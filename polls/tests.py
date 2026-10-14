@@ -289,3 +289,19 @@ class FeedTests(TestCase):
 
     def test_profile_unknown_user_404(self):
         self.assertEqual(self.client.get("/u/yokboyle/").status_code, 404)
+
+
+class SeedDemoTests(TestCase):
+    def test_seed_is_idempotent_and_hides_nothing_sensitive(self):
+        from django.core.management import call_command
+
+        call_command("seed_demo", verbosity=0)
+        count = Poll.objects.count()
+        self.assertGreaterEqual(count, 6)
+        call_command("seed_demo", verbosity=0)
+        self.assertEqual(Poll.objects.count(), count)
+        self.assertFalse(User.objects.get(username="elif_k").has_usable_password())
+        html = self.client.get("/").content.decode()
+        self.assertNotIn("demo.invalid", html)
+        call_command("seed_demo", "--reset", verbosity=0)
+        self.assertEqual(Poll.objects.count(), count)

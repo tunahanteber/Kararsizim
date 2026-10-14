@@ -23,6 +23,7 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
 
 body {
   margin: 0;
@@ -186,3 +187,14 @@ legend { font-weight: 600; margin-bottom: 8px; padding: 0; }
 .counter { text-align: right; font-size: 12px; color: var(--ink-soft); margin: 4px 0 0; }
 
 @media (prefers-reduced-motion: reduce) { .decision-bar .seg { transition: none; } }
+
+/* canlı seçenek chip'leri */
+.chip { display: inline-flex; align-items: center; gap: 6px; border: 2px solid var(--c); }
+.chip::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--c); }
+.remove-option {
+  display: inline-flex; align-items: center; justify-content: center; flex: none;
+  border-radius: 50%; background: var(--t, var(--line)); color: var(--ink); font-weight: 700;
+}
+.remove-option:hover { background: var(--c, var(--ink-soft)); color: #fff; }
+.option-row input { border-color: var(--c, var(--line)); }
+.option-row .dot { width: 18px; height: 18px; }

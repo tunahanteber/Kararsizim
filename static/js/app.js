@@ -20,20 +20,20 @@
   if (form) {
     var rows = Array.prototype.slice.call(form.querySelectorAll("[data-option-row]"));
     var addBtn = form.querySelector("[data-add-option]");
+    function domRows() { return Array.prototype.slice.call(form.querySelectorAll("[data-option-row]")); }
     function sync() {
-      var visible = rows.filter(function (r) { return !r.classList.contains("is-hidden"); });
+      var visible = domRows().filter(function (r) { return !r.classList.contains("is-hidden"); });
       addBtn.hidden = visible.length >= 5;
       visible.forEach(function (r, i) {
         r.querySelector("[data-remove]").hidden = visible.length <= 2;
-        r.querySelector(".dot").className = "dot opt-" + i;  // renk sırası DOM sırasını izler
+        r.className = "option-row opt-" + i;  // renk sırası DOM sırasını izler
+        r.querySelector(".dot").className = "dot opt-" + i;
       });
     }
     form.addEventListener("submit", function () {
       // Sunucu option_0..4 alanlarını sırayla okur; görünür sıraya göre yeniden adlandır
       var n = 0;
-      rows.slice().sort(function (a, b) {
-        return a.compareDocumentPosition(b) & 4 ? -1 : 1;
-      }).forEach(function (r) {
+      domRows().forEach(function (r) {
         var inp = r.querySelector("input");
         if (r.classList.contains("is-hidden")) { inp.disabled = true; }  // gönderilmesin
         else { inp.name = "option_" + n; n += 1; }
@@ -51,7 +51,7 @@
       });
     });
     addBtn.addEventListener("click", function () {
-      var next = rows.filter(function (r) { return r.classList.contains("is-hidden"); })[0];
+      var next = domRows().filter(function (r) { return r.classList.contains("is-hidden"); })[0];
       if (next) { next.classList.remove("is-hidden"); next.querySelector("input").focus(); }
       sync();
     });

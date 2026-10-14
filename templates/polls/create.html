@@ -21,7 +21,7 @@
       <fieldset class="field options-fieldset">
         <legend>Seçenekler (2-5 tane)</legend>
         {% for f in form.option_fields %}
-          <div class="option-row" data-option-row>
+          <div class="option-row opt-{{ forloop.counter0 }}" data-option-row>
             <span class="dot opt-{{ forloop.counter0 }}" aria-hidden="true"></span>
             {{ f }}
             <button type="button" class="remove-option" data-remove aria-label="Seçeneği kaldır">×</button>

@@ -78,13 +78,22 @@ class LoginLogoutTests(TestCase):
         r = self.client.post(reverse("login"), {"username": "Ali@Example.com", "password": "Sagl4m-Parola!"})
         self.assertRedirects(r, "/")
 
-    def test_login_with_username_fails(self):
-        r = self.client.post(reverse("login"), {"username": "ali_k", "password": "Sagl4m-Parola!"})
-        self.assertContains(r, "E-posta veya parola hatalı")
+    def test_login_with_username(self):
+        for name in ("ali_k", "Ali_K", "@ali_k"):
+            self.client.logout()
+            r = self.client.post(reverse("login"), {"username": name, "password": "Sagl4m-Parola!"})
+            self.assertRedirects(r, "/", fetch_redirect_response=False)
+            self.assertIn("_auth_user_id", self.client.session)
+
+    def test_login_with_unknown_username_generic_error(self):
+        r = self.client.post(reverse("login"), {"username": "yok_kimse", "password": "Sagl4m-Parola!"})
+        self.assertContains(r, "hatalı")
+        r2 = self.client.post(reverse("login"), {"username": "ali_k", "password": "yanlis"})
+        self.assertContains(r2, "hatalı")  # aynı mesaj: kullanıcı adı var mı yok mu belli olmaz
 
     def test_login_wrong_password(self):
         r = self.client.post(reverse("login"), {"username": "ali@example.com", "password": "yanlis"})
-        self.assertContains(r, "E-posta veya parola hatalı")
+        self.assertContains(r, "veya parola hatalı")
 
     def test_login_next(self):
         r = self.client.post(

@@ -41,18 +41,26 @@ class SignUpForm(UserCreationForm):
 
 
 class LoginForm(AuthenticationForm):
+    """E-posta VEYA kullanıcı adı + parola ile giriş."""
+
     error_messages = {
-        "invalid_login": "E-posta veya parola hatalı.",
+        "invalid_login": "E-posta/kullanıcı adı veya parola hatalı.",
         "inactive": "Bu hesap aktif değil.",
     }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["username"].label = "E-posta"
-        self.fields["username"].widget = forms.EmailInput(
-            attrs={"autofocus": True, "autocomplete": "email"}
+        self.fields["username"].label = "E-posta veya kullanıcı adı"
+        self.fields["username"].widget = forms.TextInput(
+            attrs={"autofocus": True, "autocomplete": "username", "autocapitalize": "none"}
         )
         self.fields["password"].label = "Parola"
 
     def clean_username(self):
-        return self.cleaned_data["username"].strip().lower()
+        value = self.cleaned_data["username"].strip().lower()
+        if "@" in value and not value.startswith("@"):
+            return value  # e-posta
+        # Kullanıcı adı (başındaki @ isteğe bağlı) → e-postaya çevir.
+        # Bulunamazsa değer olduğu gibi kalır ve genel "hatalı" mesajı döner.
+        user = User.objects.filter(username=value.lstrip("@")).only("email").first()
+        return user.email if user else value
