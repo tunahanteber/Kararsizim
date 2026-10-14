@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Anket aç · kararsızım{% endblock %}
+{% block content %}
+  <section class="card">
+    <h1>Neye karar veremedin?</h1>
+    <form method="post" class="form" novalidate data-poll-form>
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="form-errors" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+
+      <div class="field">
+        <label for="{{ form.question.id_for_label }}">{{ form.question.label }}</label>
+        {{ form.question }}
+        {% for e in form.question.errors %}<p class="field-error">{{ e }}</p>{% endfor %}
+      </div>
+      <div class="field">
+        <label for="{{ form.details.id_for_label }}">{{ form.details.label }}</label>
+        {{ form.details }}
+        {% for e in form.details.errors %}<p class="field-error">{{ e }}</p>{% endfor %}
+      </div>
+
+      <fieldset class="field options-fieldset">
+        <legend>Seçenekler (2-5 tane)</legend>
+        {% for f in form.option_fields %}
+          <div class="option-row" data-option-row>
+            <span class="dot opt-{{ forloop.counter0 }}" aria-hidden="true"></span>
+            {{ f }}
+            <button type="button" class="remove-option" data-remove aria-label="Seçeneği kaldır">×</button>
+          </div>
+          {% for e in f.errors %}<p class="field-error">{{ e }}</p>{% endfor %}
+        {% endfor %}
+        <button type="button" class="btn btn-ghost" data-add-option hidden>+ Seçenek ekle</button>
+      </fieldset>
+
+      <fieldset class="field">
+        <legend>{{ form.indecision_level.label }}</legend>
+        <div class="stickers">
+          {% for value, label in form.indecision_level.field.choices %}
+            <label class="sticker level-{{ value }}">
+              <input type="radio" name="indecision_level" value="{{ value }}" {% if form.indecision_level.value|stringformat:"s" == value|stringformat:"s" %}checked{% endif %}>
+              <span>{% if value == 1 %}🤔{% elif value == 2 %}😵‍💫{% else %}🌀{% endif %} {{ label }}</span>
+            </label>
+          {% endfor %}
+        </div>
+        {% for e in form.indecision_level.errors %}<p class="field-error">{{ e }}</p>{% endfor %}
+      </fieldset>
+
+      <button type="submit" class="btn btn-brand btn-block">Anketi aç</button>
+    </form>
+  </section>
+{% endblock %}

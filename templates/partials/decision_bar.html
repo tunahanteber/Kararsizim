@@ -1,0 +1,15 @@
+{# Karar çubuğu. Kilitliyken hiçbir gerçek oran bilgisi taşımaz (eşit genişlik sabit). #}
+{% if results %}
+  <div class="decision-bar" role="img" aria-label="{% for r in results %}{{ r.text }} %{{ r.percent }}{% if not forloop.last %}, {% endif %}{% endfor %}">
+    {% for r in results %}
+      {% if r.percent > 0 %}
+        <span class="seg opt-{{ r.position }}" style="--w: {{ r.percent }}%">{% if voted_position == r.position %}<span class="seg-check" aria-hidden="true">✓</span>{% endif %}</span>
+      {% endif %}
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="decision-bar is-locked" role="img" aria-label="Sonuçlar oy verince görünür">
+    {% for o in options %}<span class="seg" style="--w: 1%"><span aria-hidden="true">?</span></span>{% endfor %}
+  </div>
+  <p class="bar-hint">🔒 Oy ver, kararı gör</p>
+{% endif %}

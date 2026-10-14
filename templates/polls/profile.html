@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block title %}@{{ owner.username }} · kararsızım{% endblock %}
+{% block content %}
+  <h1 class="page-title">@{{ owner.username }}</h1>
+  {% include "partials/poll_list.html" with empty_text="Bu kişi henüz bir anket açmadı." %}
+{% endblock %}

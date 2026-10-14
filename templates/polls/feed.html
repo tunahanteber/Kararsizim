@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="tabs" role="tablist">
+    <a class="tab{% if not popular %} is-active{% endif %}" href="/">Yeni</a>
+    <a class="tab{% if popular %} is-active{% endif %}" href="/?sirala=populer">Popüler</a>
+  </div>
+  {% include "partials/poll_list.html" with empty_text="Henüz kimse kararsız değil… İlk sen ol." %}
+{% endblock %}

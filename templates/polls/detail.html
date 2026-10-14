@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}{{ poll.question }} · kararsızım{% endblock %}
+{% block content %}
+  <article class="poll-detail">
+    <div class="poll-meta">
+      <a class="author" href="{% url 'profile' username=poll.author.username %}">@{{ poll.author.username }}</a>
+      <span class="muted">· {{ poll.created_at|naturaltime }}</span>
+      <span class="level level-{{ poll.indecision_level }}">{{ poll.level_emoji }} {{ poll.level_label }}</span>
+    </div>
+    <h1 class="poll-question-lg">{{ poll.question }}</h1>
+    {% if poll.details %}<p class="muted">{{ poll.details }}</p>{% endif %}
+
+    {% if data %}
+      {% include "partials/decision_bar.html" with results=data.results voted_position=voted_position %}
+      <p class="verdict">{{ data.verdict.emoji }} {{ data.verdict.label }}</p>
+      <ul class="result-list">
+        {% for r in data.results %}
+          <li class="result-row opt-{{ r.position }}{% if voted_position == r.position %} is-mine{% endif %}" style="--w: {{ r.percent }}%">
+            <span class="result-text">{% if voted_position == r.position %}✓ {% endif %}{{ r.text }}</span>
+            <span class="result-num">{{ r.count }} oy · %{{ r.percent }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+      {% if voted_position is None %}
+        <p class="muted small">Bu senin anketin, sonuçları görüyorsun. İstersen sen de oy verebilirsin.</p>
+        <form method="post" action="{% url 'poll_vote' code=poll.code %}" class="vote-form">
+          {% csrf_token %}
+          {% for o in options %}
+            <button type="submit" name="option" value="{{ o.position }}" class="vote-btn opt-{{ o.position }}">{{ o.text }}</button>
+          {% endfor %}
+        </form>
+      {% endif %}
+    {% else %}
+      {% include "partials/decision_bar.html" with options=options %}
+      <form method="post" action="{% url 'poll_vote' code=poll.code %}" class="vote-form">
+        {% csrf_token %}
+        {% for o in options %}
+          <button type="submit" name="option" value="{{ o.position }}" class="vote-btn opt-{{ o.position }}">{{ o.text }}</button>
+        {% endfor %}
+      </form>
+    {% endif %}
+
+    <p class="muted small">{{ poll.total_votes }} kişi oyladı</p>
+    <div class="actions">
+      <button type="button" class="btn btn-ghost" data-share data-url="{{ request.build_absolute_uri }}" data-title="{{ poll.question }}">Paylaş</button>
+      {% if is_owner %}
+        <form method="post" action="{% url 'poll_delete' code=poll.code %}" data-confirm="Bu anketi silmek istediğine emin misin?">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">Sil</button>
+        </form>
+      {% endif %}
+    </div>
+  </article>
+{% endblock %}
