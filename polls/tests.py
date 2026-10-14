@@ -549,3 +549,13 @@ class ReportTests(TestCase):
             Report.objects.create(poll=self.poll, reason="spam", reporter_hash="h" * 64)
         with self.assertRaises(IntegrityError), transaction.atomic():
             Report.objects.create(poll=self.poll, reason="spam")  # kimlik yok
+
+
+class ThemeToggleTests(TestCase):
+    def test_toggle_present_and_theme_not_system_based(self):
+        html = self.client.get("/").content.decode()
+        self.assertIn("data-theme-toggle", html)
+        self.assertIn('localStorage.getItem("theme")', html)  # sayfa çizilmeden önce uygulanır
+        css = open("static/css/app.css", encoding="utf-8").read()
+        self.assertIn(':root[data-theme="dark"]', css)
+        self.assertNotIn("prefers-color-scheme", css)  # sistem tercihine bağlı değil

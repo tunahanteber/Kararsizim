@@ -1,13 +1,11 @@
 {% load static %}<!doctype html>
 <html lang="tr">
-<script>document.documentElement.classList.add("js")</script>
+<script>(function(){var d=document.documentElement;d.classList.add("js");try{if(localStorage.getItem("theme")==="dark")d.setAttribute("data-theme","dark");}catch(e){}})();</script>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}kararsızım{% endblock %}</title>
-  <meta name="theme-color" content="#FFFAF3" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#14101F" media="(prefers-color-scheme: dark)">
-  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#FFFAF3">
   <link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,6 +17,7 @@
   <header class="topbar">
     <a class="wordmark" href="/" aria-label="kararsızım">kararsız<span class="wordmark-i">ı</span>m</a>
     <nav class="topnav">
+      <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false" aria-label="Koyu temaya geç"><span data-theme-icon aria-hidden="true">🌙</span></button>
       {% if user.is_authenticated %}
         <span class="topnav-user">@{{ user.username }}</span>
         <form method="post" action="/cikis/" class="inline-form">{% csrf_token %}<button type="submit" class="link-btn">Çıkış</button></form>

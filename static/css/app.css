@@ -345,28 +345,37 @@ html:not(.js) .remove-option, html:not(.js) [data-add-option] { display: none !i
 
 
 /* =========================================================
-   Karanlık mod (sistem tercihine göre otomatik)
-   Tüm metin çiftleri WCAG AA (≥4.5:1) için hesaplandı.
+   Karanlık mod: uygulamaya özel (üst çubuktaki düğme, <html data-theme="dark">)
+   Sistem tercihine bağlı değildir. Tüm metin çiftleri WCAG AA (≥4.5:1) için hesaplandı.
    ========================================================= */
-@media (prefers-color-scheme: dark) {
-  :root {
-    color-scheme: dark;
-    --bg: #14101F;  --surface: #1E1830;
-    --ink: #F2EEFF;  --ink-soft: #B9B1D6;  --line: #382F55;
-    --brand-tint: #2A2150;
-    --brand-text: #B39DFF;
-    --opt-0: #8B66FF;  --opt-0-tint: #36295E;
-    --opt-1: #FF6B70;  --opt-1-tint: #502A3E;
-    --opt-2: #22C997;  --opt-2-tint: #1F3F47;
-    --opt-3: #FFB020;  --opt-3-tint: #50392C;
-    --opt-4: #3BA9F5;  --opt-4-tint: #24385B;
-    --ok: #4ADE9A;  --bad: #FF8A8F;  --bad-ink: #FFB3B6;
-    --toast-bg: #2D2548;  --toast-fg: #FFFFFF;
-    --stripe: #2A2342;
-  }
-  .toast { border: 1px solid var(--line); }
-  .poll-card:hover { border-color: var(--brand-text); }
-  .field input:focus, .field select:focus { border-color: var(--brand-text); }
-  .wordmark-i { color: var(--brand-text); }
-  :focus-visible { outline-color: var(--brand-text); }
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #14101F;  --surface: #1E1830;
+  --ink: #F2EEFF;  --ink-soft: #B9B1D6;  --line: #382F55;
+  --brand-tint: #2A2150;
+  --brand-text: #B39DFF;
+  --opt-0: #8B66FF;  --opt-0-tint: #36295E;
+  --opt-1: #FF6B70;  --opt-1-tint: #502A3E;
+  --opt-2: #22C997;  --opt-2-tint: #1F3F47;
+  --opt-3: #FFB020;  --opt-3-tint: #50392C;
+  --opt-4: #3BA9F5;  --opt-4-tint: #24385B;
+  --ok: #4ADE9A;  --bad: #FF8A8F;  --bad-ink: #FFB3B6;
+  --toast-bg: #2D2548;  --toast-fg: #FFFFFF;
+  --stripe: #2A2342;
 }
+:root[data-theme="dark"] .toast { border: 1px solid var(--line); }
+:root[data-theme="dark"] .poll-card:hover { border-color: var(--brand-text); }
+:root[data-theme="dark"] .field input:focus,
+:root[data-theme="dark"] .field select:focus { border-color: var(--brand-text); }
+:root[data-theme="dark"] .wordmark-i { color: var(--brand-text); }
+:root[data-theme="dark"] :focus-visible { outline-color: var(--brand-text); }
+
+/* tema düğmesi */
+.theme-toggle {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 48px; height: 48px; padding: 0; border-radius: 50%;
+  background: var(--surface); border: 2px solid var(--line); color: var(--ink);
+  font-size: 20px; line-height: 1; cursor: pointer;
+}
+.theme-toggle:hover { border-color: var(--brand-text); }
+html:not(.js) .theme-toggle { display: none; }

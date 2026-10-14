@@ -601,7 +601,7 @@ Bunlar bilinçli kabul edilmiş sınırlardır, hata değildir:
 4. **Rate limit basit:** IP başına DB cache ile sabit pencere (dakikada 20 oy, saatte 10 anket, saatte 5 şikâyet; `RATE_LIMITS` ayarı). Sayaç atomik değildir, ortak IP (CGNAT) arkasındaki kullanıcılar aynı sınırı paylaşır. Bot koruması (Turnstile) yok.
 5. **Oy değiştirme/geri çekme yok**, anket düzenleme yok (silme ve kapatma var; kapatılan anket yeniden açılamaz). Kapalı anketin sonuçları herkese açıktır.
 6. **Moderasyon elle:** şikâyetler yalnızca Django admin'de (Reports) listelenir; silme/kapatma admin'den yapılır. Bildirim yok.
-7. **Arama, etiket/kategori, bildirim, e-posta doğrulama, parola sıfırlama yok.** Karanlık mod yalnızca sistem tercihine göre otomatik (elle geçiş düğmesi yok).
+7. **Arama, etiket/kategori, bildirim, e-posta doğrulama, parola sıfırlama yok.** Karanlık mod uygulamaya özeldir: üst çubuktaki düğmeyle Açık/Koyu seçilir, sistem tercihine bağlı değildir; seçim tarayıcıda (localStorage) tutulur, JS kapalıysa açık tema.
 8. Oy sayıları her istekte `Count` ile hesaplanır; çok yüksek trafikte denormalize sayaç gerekebilir.
 9. Seçenek metni tekrar kontrolü Türkçe `I/ı/İ/i` dönüşümlerinde kusursuz değildir.
 

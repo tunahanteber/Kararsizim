@@ -231,4 +231,25 @@
       if (b) setTimeout(function () { b.disabled = true; }, 0);
     });
   });
+
+  // Tema düğmesi: uygulamaya özel Açık/Koyu (sistem tercihinden bağımsız), seçim localStorage'da saklanır
+  var themeBtn = document.querySelector("[data-theme-toggle]");
+  if (themeBtn) {
+    var root = document.documentElement;
+    var themeMeta = document.querySelector('meta[name="theme-color"]');
+    var syncTheme = function () {
+      var dark = root.getAttribute("data-theme") === "dark";
+      themeBtn.setAttribute("aria-pressed", dark ? "true" : "false");
+      themeBtn.setAttribute("aria-label", dark ? "Açık temaya geç" : "Koyu temaya geç");
+      themeBtn.querySelector("[data-theme-icon]").textContent = dark ? "☀️" : "🌙";
+      if (themeMeta) themeMeta.setAttribute("content", dark ? "#14101F" : "#FFFAF3");
+    };
+    themeBtn.addEventListener("click", function () {
+      var next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+      if (next === "dark") root.setAttribute("data-theme", "dark"); else root.removeAttribute("data-theme");
+      try { localStorage.setItem("theme", next); } catch (e) {}
+      syncTheme();
+    });
+    syncTheme();
+  }
 })();
