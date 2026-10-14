@@ -305,3 +305,61 @@ class SeedDemoTests(TestCase):
         self.assertNotIn("demo.invalid", html)
         call_command("seed_demo", "--reset", verbosity=0)
         self.assertEqual(Poll.objects.count(), count)
+
+
+class Faz4Tests(TestCase):
+    def setUp(self):
+        self.author = make_user("yazar")
+
+    def test_leader_in_results(self):
+        poll = make_poll(self.author, ("A", "B", "C"))
+        from django.test import Client
+        for pos in (1, 1, 2):
+            Client().post(reverse("poll_vote", args=[poll.code]), {"option": pos})
+        data = services.get_results(poll)
+        self.assertEqual(data["leader"], 1)
+        self.assertIsNone(services.get_results(make_poll(self.author, ("X", "Y"), "Oy yok sorusu?"))["leader"])
+
+    def test_json_vote_response_shape_unchanged(self):
+        poll = make_poll(self.author)
+        r = self.client.post(reverse("poll_vote", args=[poll.code]), {"option": 0}, HTTP_ACCEPT="application/json")
+        self.assertEqual(set(r.json()), {"ok", "already_voted", "voted_option", "total", "results", "verdict"})
+        self.assertEqual(set(r.json()["verdict"]), {"key", "label"})
+
+    def test_level_3_badge_spins_and_labels(self):
+        poll3 = make_poll(self.author, level=3, question="Tam kararsız soru?")
+        poll1 = make_poll(self.author, level=1, question="Biraz kararsız soru?")
+        html = self.client.get("/").content.decode()
+        self.assertIn("Tam bir kararsız", html)
+        self.assertIn("Biraz kararsız", html)
+        self.assertEqual(html.count("emoji spin"), 1)  # yalnızca seviye 3 döner
+
+    def test_locked_bar_has_aria_and_no_percent(self):
+        poll = make_poll(self.author)
+        from django.test import Client
+        Client().post(reverse("poll_vote", args=[poll.code]), {"option": 0})
+        html = self.client.get(f"/a/{poll.code}/").content.decode()
+        self.assertIn('aria-label="Sonuçlar oy verince görünür"', html)
+        self.assertNotIn("is-leader", html)
+
+    def test_voted_page_marks_leader_and_check(self):
+        poll = make_poll(self.author)
+        self.client.post(reverse("poll_vote", args=[poll.code]), {"option": 0})
+        html = self.client.get(f"/a/{poll.code}/").content.decode()
+        self.assertIn("is-leader", html)
+        self.assertIn("seg-check", html)
+        self.assertNotIn("data-vote-form", html)  # oy veren için form yok
+
+    def test_custom_404_and_500_pages(self):
+        from django.test import override_settings
+        with override_settings(DEBUG=False, ALLOWED_HOSTS=["testserver"]):
+            r = self.client.get("/yok/boyle/bir/sayfa/")
+            self.assertContains(r, "kararsız kalmış", status_code=404)
+        from django.template.loader import render_to_string
+        self.assertIn("Biz de şaşırdık", render_to_string("500.html"))
+
+    def test_page_has_favicon_skip_link_and_asset_version(self):
+        html = self.client.get("/").content.decode()
+        self.assertIn("favicon.svg", html)
+        self.assertIn('href="#icerik"', html)
+        self.assertRegex(html, r"app\.css\?v=\d+")

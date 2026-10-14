@@ -5,12 +5,15 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}kararsızım{% endblock %}</title>
+  <meta name="theme-color" content="#FFFAF3">
+  <link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/app.css' %}?v={{ ASSET_VERSION }}">
 </head>
 <body>
+  <a class="skip-link" href="#icerik">İçeriğe geç</a>
   <header class="topbar">
     <a class="wordmark" href="/" aria-label="kararsızım">kararsız<span class="wordmark-i">ı</span>m</a>
     <nav class="topnav">
@@ -23,7 +26,7 @@
       <a class="btn btn-brand" href="/yeni/">Anket aç</a>
     </nav>
   </header>
-  <main class="container">
+  <main class="container" id="icerik">
     {% block content %}{% endblock %}
   </main>
   {% if messages %}

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Source of truth
 
-`docs/KARARSIZIM.md` (Turkish) is the full spec: data model, business rules, design system, Vercel/Supabase setup, and the phase roadmap (Faz 0–5). Read it before changing anything. **Implement only the phase the user asks for; don't start the next one.** Current state: Faz 0 (skeleton) is done; Faz 1+ not started.
+`docs/KARARSIZIM.md` (Turkish) is the full spec: data model, business rules, design system, Vercel/Supabase setup, and the phase roadmap (Faz 0–5). Read it before changing anything. **Implement only the phase the user asks for; don't start the next one.** Current state: Faz 0, 2, 3, 4 done. Faz 1 is partly done (Supabase project, RLS migrations, `vercel.json`, `/saglik/` exist); the Vercel project/env setup and Data API toggle are still pending (user deferred them).
 
 ## Commands
 
@@ -17,6 +17,7 @@ Use the project venv (Python 3.14 here, spec says 3.12 — user chose to stay on
 .venv/bin/python manage.py test                      # all tests
 .venv/bin/python manage.py test polls.tests.TestX.test_y   # single test
 .venv/bin/python manage.py check --deploy
+.venv/bin/python manage.py seed_demo [--reset]       # demo users (no usable password), polls and votes
 ```
 
 Settings require `DJANGO_SECRET_KEY` (loaded from a git-ignored `.env`; see `.env.example`). With `DJANGO_DEBUG=1` and no `DATABASE_URL`, SQLite is used.
@@ -30,3 +31,7 @@ Settings require `DJANGO_SECRET_KEY` (loaded from a git-ignored `.env`; see `.en
 - The `DATABASE_URL` branch in settings is tuned for Supabase's transaction pooler on serverless (`conn_max_age=0`, `prepare_threshold=None`, `DISABLE_SERVER_SIDE_CURSORS`). Do not change these (spec rule, Bölüm 9.4/13).
 - Migrations are never run during the Vercel build; they're applied locally against the Supabase session pooler (port 5432).
 - Code and identifiers in English; all user-facing text in Turkish.
+- `.env` points at the real Supabase DB (session pooler); `manage.py test` is forced onto SQLite in `settings.py`. To try things against a throwaway DB, run `DATABASE_URL= manage.py runserver` (with `DJANGO_DEBUG=1`) and delete `db.sqlite3` afterwards.
+- Every migration that adds tables must be followed by a migration calling `config.rls.enable_rls` (see `polls/migrations/0002_enable_rls.py`).
+- Vote results are only computed/rendered for users allowed to see them (`services.can_see_results`); the vote form posts the option `position` (0-4), never internal IDs. Voting works without JS; `static/js/app.js` upgrades it to fetch+JSON and falls back to a normal form post.
+- CSS/JS URLs carry `?v=<mtime>` (`config/context_processors.py`) so browsers don't serve stale assets.

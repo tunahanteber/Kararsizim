@@ -1,5 +1,7 @@
 {% extends "base.html" %}
+{% block title %}kararsızım · Kararsız kaldığın şeyi topluluğa sor{% endblock %}
 {% block content %}
+  <h1 class="sr-only">Anketler</h1>
   <div class="tabs" role="tablist">
     <a class="tab{% if not popular %} is-active{% endif %}" href="/">Yeni</a>
     <a class="tab{% if popular %} is-active{% endif %}" href="/?sirala=populer">Popüler</a>

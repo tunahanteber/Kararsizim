@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Sayfa bulunamadı · kararsızım{% endblock %}
+{% block content %}
+  <section class="card error-page">
+    <p class="error-emoji" aria-hidden="true">🤷</p>
+    <h1>Bu sayfa da kararsız kalmış</h1>
+    <p class="muted">Aradığın sayfa yok ya da silinmiş. Belki de hiç var olmadı, kim bilir?</p>
+    <p><a class="btn btn-brand" href="/">Anketlere dön</a></p>
+  </section>
+{% endblock %}

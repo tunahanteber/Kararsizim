@@ -199,3 +199,125 @@ legend { font-weight: 600; margin-bottom: 8px; padding: 0; }
 .remove-option:hover { background: var(--c, var(--ink-soft)); color: #fff; }
 .option-row input { border-color: var(--c, var(--line)); }
 .option-row .dot { width: 18px; height: 18px; }
+
+/* =========================================================
+   Faz 4: tasarım, imza öğeleri, mobil ve erişilebilirlik
+   ========================================================= */
+
+/* --- erişilebilirlik temelleri --- */
+.sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.skip-link { position: absolute; left: 12px; top: -60px; z-index: 100; background: var(--ink); color: #fff; padding: 10px 16px; border-radius: var(--radius-md); font-weight: 600; text-decoration: none; }
+.skip-link:focus { top: 12px; }
+:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
+.field input:focus-visible { outline: none; }
+html { -webkit-text-size-adjust: 100%; }
+img, svg { max-width: 100%; }
+
+/* --- dokunma alanları ≥ 48px --- */
+.btn, .tab, .link-btn { min-height: 48px; display: inline-flex; align-items: center; justify-content: center; }
+.link-btn { padding: 0 6px; }
+.remove-option { width: 48px; height: 48px; }
+.field input { min-height: 48px; }
+.topnav a:not(.btn) { min-height: 48px; display: inline-flex; align-items: center; padding: 0 4px; }
+
+/* --- üst bar & wordmark --- */
+.topbar { gap: 8px; flex-wrap: wrap; }
+.topnav { flex-wrap: wrap; justify-content: flex-end; min-width: 0; }
+.topnav-user { display: inline-block; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wordmark { display: inline-flex; align-items: center; min-height: 48px; }
+.wordmark-i { transform-origin: 50% 80%; }
+.wordmark:hover .wordmark-i, .wordmark:focus-visible .wordmark-i { animation: wobble .7s ease-in-out; }
+@keyframes wobble {
+  0%, 100% { transform: skewX(-8deg) rotate(0); }
+  20% { transform: skewX(-8deg) rotate(-14deg); }
+  40% { transform: skewX(-8deg) rotate(12deg); }
+  60% { transform: skewX(-8deg) rotate(-8deg); }
+  80% { transform: skewX(-8deg) rotate(5deg); }
+}
+
+/* --- metin taşmaları --- */
+.poll-question, .poll-question-lg, .result-text, .chip, .vote-btn, .poll-meta { overflow-wrap: anywhere; }
+
+/* --- kararsızlık rozeti --- */
+.level { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+.level .emoji { display: inline-block; line-height: 1; }
+.level-1 { background: var(--opt-3-tint); color: var(--ink); }
+.level-2 { background: var(--opt-1-tint); color: var(--ink); }
+.level-3 { background: var(--brand); color: #fff; }
+.level .spin { animation: spin 3s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* --- anket kartı: sticker hissi --- */
+.poll-card { transition: transform .15s ease, border-color .15s ease; }
+.poll-card:hover { transform: translateY(-2px) rotate(-.3deg); border-color: var(--brand); }
+.poll-card:focus-within { border-color: var(--brand); }
+.poll-card .poll-card-link:focus-visible { outline: none; }
+.poll-card .poll-card-link:focus-visible::after { outline: 3px solid var(--brand); outline-offset: 2px; }
+
+/* --- KARAR ÇUBUĞU --- */
+@property --w { syntax: "<percentage>"; inherits: false; initial-value: 0%; }
+.decision-bar { height: 22px; }
+.decision-bar .seg { animation: seg-grow .6s cubic-bezier(.2, .8, .2, 1) both; }
+@keyframes seg-grow { from { flex-basis: 0%; } }
+.decision-bar .seg.is-leader { animation: seg-grow .6s cubic-bezier(.2, .8, .2, 1) both, seg-pulse .6s ease-in-out .6s 1; }
+@keyframes seg-pulse { 50% { filter: brightness(1.18) saturate(1.25); } }
+.seg-check { top: 2px; font-size: 13px; line-height: 18px; background: rgba(0, 0, 0, .18); width: 18px; height: 18px; border-radius: 50%; text-align: center; }
+.opt-3 .seg-check { background: rgba(255, 255, 255, .55); }
+.decision-bar.is-locked .seg { animation: none; }
+.result-row { animation: row-fill .6s cubic-bezier(.2, .8, .2, 1) both; }
+@keyframes row-fill { from { --w: 0%; } }
+.verdict { display: inline-flex; align-items: center; gap: 6px; padding: 4px 14px; background: var(--brand-tint); border-radius: var(--radius-pill); margin: 12px 0 4px; }
+
+/* --- oy düğmeleri --- */
+.vote-prompt { margin: 0 0 8px; font-weight: 600; color: var(--ink-soft); }
+.vote-options { display: grid; gap: 10px; }
+.vote-btn { min-height: 56px; transition: transform .1s ease, background .15s ease, color .15s ease; }
+.vote-btn:active { transform: scale(.985); }
+.vote-form.is-busy .vote-btn { opacity: .6; pointer-events: none; }
+
+/* --- toast (JS ile de üretilir) --- */
+.toasts { z-index: 50; }
+.toast-error { background: #8A1C21; }
+
+/* --- hata sayfaları --- */
+.error-page { text-align: center; padding: 40px 24px; }
+.error-emoji { font-size: 56px; margin: 0; line-height: 1; }
+
+/* --- küçük ekranlar --- */
+@media (max-width: 420px) {
+  .container { padding: 12px; }
+  .poll-card, .poll-detail, .card { padding: 14px; }
+  .poll-question { font-size: 21px; }
+  .level { margin-left: 0; }
+  .topbar { padding: 8px 12px; }
+  .wordmark { font-size: 22px; }
+  .topnav-user { max-width: 90px; }
+}
+@media (min-width: 640px) {
+  .poll-question { font-size: 24px; }
+  .poll-question-lg { font-size: 28px; }
+}
+
+/* --- hareket azaltma --- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001s !important; animation-iteration-count: 1 !important; animation-delay: 0s !important; transition-duration: .001s !important; scroll-behavior: auto !important; }
+  .level .spin { animation: none; }
+  .poll-card:hover { transform: none; }
+}
+
+/* dokunma alanı: yerleşimi değiştirmeden yazar bağlantısını ≥48px yap */
+.author { display: inline-block; padding: 14px 4px; margin: -14px -4px; }
+.skip-link { min-height: 48px; display: inline-flex; align-items: center; }
+
+/* gizli radyolar kendi sticker kartı içinde kalsın (sayfayı genişletmesin) */
+.sticker { position: relative; }
+.sticker input { position: absolute; inset: 0; width: 100%; height: 100%; min-height: 0; margin: 0; opacity: 0; cursor: pointer; }
+
+/* JS yokken (html.js yok) işlevsiz kontrolleri gizle; form 5 input ile yine çalışır */
+html:not(.js) .remove-option, html:not(.js) [data-add-option] { display: none !important; }
+
+/* oy düğmesi hover/odak: metin hep koyu kalır (beyaz metin renkli zeminde AA kontrastını geçmiyor) */
+.vote-btn:hover, .vote-btn:focus-visible, .opt-3.vote-btn:hover, .opt-3.vote-btn:focus-visible {
+  background: var(--t); background: color-mix(in srgb, var(--c) 28%, #fff); color: var(--ink);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 35%, transparent);
+}

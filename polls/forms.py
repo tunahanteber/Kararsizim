@@ -5,7 +5,10 @@ from .services import MAX_OPTIONS, MIN_OPTIONS, normalize_option_text
 
 
 class PollForm(forms.Form):
-    question = forms.CharField(label="Sorun ne?", max_length=160, strip=True)
+    question = forms.CharField(
+        label="Sorun ne?", max_length=160, strip=True,
+        widget=forms.TextInput(attrs={"placeholder": "Örn. Bu akşam sinemaya mı gitsem, restorana mı?"}),
+    )
     details = forms.CharField(label="Kısa açıklama (opsiyonel)", max_length=300, required=False, strip=True)
     indecision_level = forms.TypedChoiceField(
         label="Ne kadar kararsızsın?",
@@ -18,7 +21,8 @@ class PollForm(forms.Form):
         super().__init__(*args, **kwargs)
         for i in range(MAX_OPTIONS):
             self.fields[f"option_{i}"] = forms.CharField(
-                label=f"Seçenek {i + 1}", max_length=80, required=False, strip=True
+                label=f"Seçenek {i + 1}", max_length=80, required=False, strip=True,
+                widget=forms.TextInput(attrs={"aria-label": f"Seçenek {i + 1}", "placeholder": f"Seçenek {i + 1}"}),
             )
 
     def clean_question(self):

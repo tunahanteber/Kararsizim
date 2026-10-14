@@ -149,7 +149,9 @@ def build_results(options, counts_by_option):
         {"position": o.position, "text": o.text, "count": c, "percent": p}
         for o, c, p in zip(options, counts, percents)
     ]
-    return {"total": sum(counts), "results": results, "verdict": compute_verdict(results)}
+    total = sum(counts)
+    leader = max(results, key=lambda r: r["count"])["position"] if total else None
+    return {"total": total, "results": results, "verdict": compute_verdict(results), "leader": leader}
 
 
 def get_results(poll):
