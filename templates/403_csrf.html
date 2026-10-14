@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Oturum süresi doldu · kararsızım{% endblock %}
+{% block content %}
+  <section class="card">
+    <h1>Bir şeyler ters gitti 🤔</h1>
+    <p class="muted">Sayfa uzun süre açık kaldığı ya da form iki kez gönderildiği için işlem tamamlanamadı. Hiçbir şey kaydedilmedi.</p>
+    <p><a class="btn btn-brand" href="javascript:history.back()">Geri dön ve tekrar dene</a></p>
+    <p class="muted"><a href="/">Ana sayfaya git</a></p>
+  </section>
+{% endblock %}

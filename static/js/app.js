@@ -85,4 +85,14 @@
       }
     });
   });
+
+  // Çift gönderimi engelle (giriş/kayıt): ikinci istek eski CSRF token'ıyla gelip 403 verirdi
+  document.querySelectorAll("form[data-once]").forEach(function (f) {
+    f.addEventListener("submit", function (e) {
+      if (f.dataset.submitted) { e.preventDefault(); return; }
+      f.dataset.submitted = "1";
+      var b = f.querySelector('button[type="submit"]');
+      if (b) setTimeout(function () { b.disabled = true; }, 0);
+    });
+  });
 })();

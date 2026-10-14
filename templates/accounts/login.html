@@ -3,7 +3,7 @@
 {% block content %}
   <section class="card">
     <h1>Tekrar hoş geldin</h1>
-    <form method="post" class="form" novalidate>
+    <form method="post" class="form" novalidate data-once>
       {% csrf_token %}
       {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
       {% include "accounts/_form.html" %}

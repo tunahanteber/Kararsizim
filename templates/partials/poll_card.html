@@ -1,12 +1,11 @@
 {% load humanize %}
 <article class="poll-card">
-  <a class="poll-card-link" href="{% url 'poll_detail' code=poll.code %}" aria-label="{{ poll.question }}"></a>
   <div class="poll-meta">
     <a class="author" href="{% url 'profile' username=poll.author.username %}">@{{ poll.author.username }}</a>
     <span class="muted">· {{ poll.created_at|naturaltime }}</span>
     <span class="level level-{{ poll.indecision_level }}">{{ poll.level_emoji }} {{ poll.level_label }}</span>
   </div>
-  <h2 class="poll-question">{{ poll.question }}</h2>
+  <h2 class="poll-question"><a class="poll-card-link" href="{% url 'poll_detail' code=poll.code %}">{{ poll.question }}</a></h2>
   <ul class="chips">
     {% for o in poll.options.all %}<li class="chip opt-{{ o.position }}">{{ o.text }}</li>{% endfor %}
   </ul>

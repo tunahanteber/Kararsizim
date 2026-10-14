@@ -126,3 +126,21 @@ class UserModelTests(TestCase):
         User.objects.create_user(email="a@example.com", username="ali_k", password="x")
         with self.assertRaises(IntegrityError), transaction.atomic():
             User.objects.bulk_create([User(email="b@example.com", username="ALI_K", password="x")])
+
+
+class CsrfFailureTests(TestCase):
+    def test_friendly_403_page(self):
+        from django.test import Client
+
+        r = Client(enforce_csrf_checks=True).post(reverse("login"), {"username": "x", "password": "y"})
+        self.assertEqual(r.status_code, 403)
+        self.assertContains(r, "Hiçbir şey kaydedilmedi", status_code=403)
+
+    def test_double_submit_after_login_redirects_home(self):
+        from django.test import Client
+
+        user = User.objects.create_user(email="a@example.com", username="ali_k", password="Sagl4m-Parola!")
+        c = Client(enforce_csrf_checks=True)
+        c.force_login(user)
+        r = c.post(reverse("login"), {"username": "a@example.com", "password": "Sagl4m-Parola!"})
+        self.assertRedirects(r, "/", fetch_redirect_response=False)
