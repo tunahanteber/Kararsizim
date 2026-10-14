@@ -15,11 +15,11 @@ CODE_LENGTH = 12
 MIN_OPTIONS, MAX_OPTIONS = 2, 5
 
 VERDICTS = {
-    "kil_payi": ("Kıl payı", "⚖️"),
-    "basa_bas": ("Başa baş", "🔥"),
-    "net_karar": ("Net karar", "✅"),
-    "one_cikan": ("Öne çıkan var", "👀"),
-    "az_oy": ("Henüz erken", "⏳"),
+    "kil_payi": "Kıl payı",
+    "basa_bas": "Başa baş",
+    "net_karar": "Net karar",
+    "one_cikan": "Öne çıkan var",
+    "az_oy": "Henüz erken",
 }
 
 
@@ -153,8 +153,7 @@ def compute_verdict(results):
             key = "basa_bas"
         elif lead >= 70:
             key = "net_karar"
-    label, emoji = VERDICTS[key]
-    return {"key": key, "label": label, "emoji": emoji}
+    return {"key": key, "label": VERDICTS[key]}
 
 
 def build_results(options, counts_by_option):

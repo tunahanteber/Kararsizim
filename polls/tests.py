@@ -326,13 +326,13 @@ class Faz4Tests(TestCase):
         self.assertEqual(set(r.json()), {"ok", "already_voted", "voted_option", "total", "results", "verdict"})
         self.assertEqual(set(r.json()["verdict"]), {"key", "label"})
 
-    def test_level_3_badge_spins_and_labels(self):
-        poll3 = make_poll(self.author, level=3, question="Tam kararsız soru?")
-        poll1 = make_poll(self.author, level=1, question="Biraz kararsız soru?")
+    def test_level_badges_are_text_only(self):
+        make_poll(self.author, level=3, question="Tam kararsız soru?")
+        make_poll(self.author, level=1, question="Biraz kararsız soru?")
         html = self.client.get("/").content.decode()
         self.assertIn("Tam bir kararsız", html)
         self.assertIn("Biraz kararsız", html)
-        self.assertEqual(html.count("emoji spin"), 1)  # yalnızca seviye 3 döner
+        self.assertNotIn("spin", html)
 
     def test_locked_bar_has_aria_and_no_percent(self):
         poll = make_poll(self.author)
@@ -559,3 +559,39 @@ class ThemeToggleTests(TestCase):
         css = open("static/css/app.css", encoding="utf-8").read()
         self.assertIn(':root[data-theme="dark"]', css)
         self.assertNotIn("prefers-color-scheme", css)  # sistem tercihine bağlı değil
+
+
+class NoEmojiTests(TestCase):
+    """Sitede dekoratif emoji kullanılmaz (✓ yazı işareti emoji değildir)."""
+
+    EMOJI = re.compile("[\U0001F300-\U0001FAFF\u2600-\u26FF\u2700-\u27BF\u2B00-\u2BFF\u2300-\u23FF\u200d\uFE0F]")
+
+    def assertNoEmoji(self, html, where):
+        found = self.EMOJI.findall(html.replace("\u2713", ""))
+        self.assertEqual(found, [], f"{where}: emoji bulundu {found}")
+
+    def test_pages_have_no_emoji(self):
+        author = make_user("yazar")
+        poll = make_poll(author, level=3)
+        services.close_poll(make_poll(author, question="Kapalı bir soru mu?"))
+        self.client.post(reverse("poll_vote", args=[poll.code]), {"option": 0})
+        self.client.force_login(author)
+        for url in ("/", f"/a/{poll.code}/", "/u/yazar/", "/yeni/", "/?filtre=oy-vermediklerim"):
+            self.assertNoEmoji(self.client.get(url).content.decode(), url)
+        self.client.logout()
+        for url in ("/giris/", "/kayit/", f"/a/{poll.code}/"):
+            self.assertNoEmoji(self.client.get(url).content.decode(), url)
+
+    def test_error_pages_have_no_emoji(self):
+        from django.template.loader import render_to_string
+        from django.test import override_settings
+        for name in ("404.html", "500.html", "429.html", "403_csrf.html"):
+            self.assertNoEmoji(render_to_string(name), name)
+        with override_settings(DEBUG=False, ALLOWED_HOSTS=["testserver"]):
+            self.assertContains(self.client.get("/yok/sayfa/"), "404", status_code=404)
+
+    def test_js_and_json_have_no_emoji(self):
+        self.assertNoEmoji(open("static/js/app.js", encoding="utf-8").read(), "app.js")
+        poll = make_poll(make_user("yazar"))
+        r = self.client.post(reverse("poll_vote", args=[poll.code]), {"option": 0}, HTTP_ACCEPT="application/json")
+        self.assertNoEmoji(r.content.decode(), "oy JSON")

@@ -12,7 +12,7 @@ class PollForm(forms.Form):
     details = forms.CharField(label="Kısa açıklama (opsiyonel)", max_length=300, required=False, strip=True)
     indecision_level = forms.TypedChoiceField(
         label="Ne kadar kararsızsın?",
-        choices=[(k, v[0]) for k, v in LEVELS.items()],
+        choices=list(LEVELS.items()),
         coerce=int,
         initial=2,
     )

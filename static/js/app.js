@@ -98,7 +98,7 @@
     btn.addEventListener("click", function () {
       var url = btn.getAttribute("data-url"), title = btn.getAttribute("data-title");
       if (navigator.share) { navigator.share({ title: title, url: url }).catch(function () {}); return; }
-      var done = function () { toast("Link kopyalandı 📋"); };
+      var done = function () { toast("Link kopyalandı"); };
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(url).then(done, function () { toast("Link kopyalanamadı, adres çubuğundan kopyalayabilirsin.", "error"); });
       } else {
@@ -112,7 +112,6 @@
   });
 
   // Oy ver: sayfa yenilenmeden sonuçları aç (JS yoksa / hata olursa normal form gönderimi çalışır)
-  var VERDICT_EMOJI = { kil_payi: "⚖️", basa_bas: "🔥", net_karar: "✅", one_cikan: "👀", az_oy: "⏳" };
   function el(tag, cls, text) {
     var n = document.createElement(tag);
     if (cls) n.className = cls;
@@ -145,10 +144,7 @@
   function buildExtra(d) {
     var frag = document.createDocumentFragment();
     var v = el("p", "verdict");
-    var emoji = el("span", null, VERDICT_EMOJI[d.verdict.key] || "");
-    emoji.setAttribute("aria-hidden", "true");
-    v.appendChild(emoji);
-    v.appendChild(document.createTextNode(" " + d.verdict.label));
+    v.appendChild(document.createTextNode(d.verdict.label));
     frag.appendChild(v);
     var ul = el("ul", "result-list");
     d.results.forEach(function (r) {
@@ -211,7 +207,7 @@
         if (!d) return;
         var root = form.closest("[data-poll-detail]");
         showResults(root, d);
-        toast(d.already_voted ? "Zaten oy verdin, işte sonuçlar." : "Oyun kaydedildi! 🎉");
+        toast(d.already_voted ? "Zaten oy verdin, işte sonuçlar." : "Oyun kaydedildi!");
       }).catch(function () {
         // Hata: normal form gönderimine dön (seçilen seçenek gizli alanla taşınır)
         var hidden = document.createElement("input");
@@ -239,9 +235,6 @@
     var themeMeta = document.querySelector('meta[name="theme-color"]');
     var syncTheme = function () {
       var dark = root.getAttribute("data-theme") === "dark";
-      themeBtn.setAttribute("aria-pressed", dark ? "true" : "false");
-      themeBtn.setAttribute("aria-label", dark ? "Açık temaya geç" : "Koyu temaya geç");
-      themeBtn.querySelector("[data-theme-icon]").textContent = dark ? "☀️" : "🌙";
       if (themeMeta) themeMeta.setAttribute("content", dark ? "#14101F" : "#FFFAF3");
     };
     themeBtn.addEventListener("click", function () {

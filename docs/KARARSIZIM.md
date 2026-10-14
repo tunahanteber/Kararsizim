@@ -276,6 +276,7 @@ Oy verme JS olmadan da çalışmalı (düz `<form method="post">`). JS varsa for
 - Hedef kitle: genç kullanıcılar. **Açık arka plan**, **canlı renkler**, yüzeylerde bu renklerin **açık tonları (tint)**, temiz ve ferah düzen.
 - Mobil öncelikli (çoğu kullanıcı telefondan girecek). Maksimum içerik genişliği ~640px, tek kolon akış.
 - Yuvarlak köşeler, kalın ama kısa gölgeler yerine renkli kenarlıklar ve hafif "sticker" hissi.
+- **Emoji yok (kullanıcı kararı):** Arayüzde dekoratif emoji kullanılmaz; aşağıdaki tablolardaki emojiler (rozet, sonuç etiketi, kilit simgesi) uygulanmamıştır, yalnızca metin kullanılır. `✓` işareti yazı işaretidir ve kalır. Üst çubuk ekranın kenarlarına yayılır (logo sol üst; tema düğmesi ve menü sağ kenar), tema düğmesi yazılıdır ("Koyu mod" / "Açık mod").
 - Dil: samimi, kısa, "sen" diliyle. Örn. *"Oy ver, sonucu gör"*, *"Sen de kararsız mısın?"*
 
 ### 7.2 Renk token'ları (`static/css/app.css` içinde `:root`)

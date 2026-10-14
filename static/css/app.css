@@ -251,12 +251,9 @@ img, svg { max-width: 100%; }
 
 /* --- kararsızlık rozeti --- */
 .level { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
-.level .emoji { display: inline-block; line-height: 1; }
 .level-1 { background: var(--opt-3-tint); color: var(--ink); }
 .level-2 { background: var(--opt-1-tint); color: var(--ink); }
 .level-3 { background: var(--brand); color: var(--on-brand); }
-.level .spin { animation: spin 3s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
 
 /* --- anket kartı: sticker hissi --- */
 .poll-card { transition: transform .15s ease, border-color .15s ease; }
@@ -292,7 +289,7 @@ img, svg { max-width: 100%; }
 
 /* --- hata sayfaları --- */
 .error-page { text-align: center; padding: 40px 24px; }
-.error-emoji { font-size: 56px; margin: 0; line-height: 1; }
+.error-code { font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 64px; line-height: 1; margin: 0 0 8px; color: var(--brand-text); }
 
 /* --- küçük ekranlar --- */
 @media (max-width: 420px) {
@@ -312,7 +309,6 @@ img, svg { max-width: 100%; }
 /* --- hareket azaltma --- */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .001s !important; animation-iteration-count: 1 !important; animation-delay: 0s !important; transition-duration: .001s !important; scroll-behavior: auto !important; }
-  .level .spin { animation: none; }
   .poll-card:hover { transform: none; }
 }
 
@@ -373,9 +369,17 @@ html:not(.js) .remove-option, html:not(.js) [data-add-option] { display: none !i
 /* tema düğmesi */
 .theme-toggle {
   display: inline-flex; align-items: center; justify-content: center;
-  width: 48px; height: 48px; padding: 0; border-radius: 50%;
+  min-height: 48px; padding: 0 16px; border-radius: var(--radius-pill);
   background: var(--surface); border: 2px solid var(--line); color: var(--ink);
-  font-size: 20px; line-height: 1; cursor: pointer;
+  font: inherit; font-weight: 600; font-size: 15px; cursor: pointer; white-space: nowrap;
 }
+.theme-toggle .label-dark { display: none; }
+:root[data-theme="dark"] .theme-toggle .label-light { display: none; }
+:root[data-theme="dark"] .theme-toggle .label-dark { display: inline; }
 .theme-toggle:hover { border-color: var(--brand-text); }
 html:not(.js) .theme-toggle { display: none; }
+
+
+/* üst çubuk ekranın kenarlarına yayılır: logo sol üstte, menü ve tema düğmesi sağ kenarda */
+.topbar { max-width: none; width: 100%; margin: 0; padding: 14px clamp(16px, 3vw, 40px); }
+@media (max-width: 420px) { .topbar { padding: 8px 12px; } }

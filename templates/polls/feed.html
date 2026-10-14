@@ -8,7 +8,7 @@
     <a class="tab{% if unvoted %} is-active{% endif %}" href="/?filtre=oy-vermediklerim"{% if unvoted %} aria-current="page"{% endif %}>Oy vermediklerim</a>
   </nav>
   {% if unvoted %}
-    {% include "partials/poll_list.html" with empty_text="Hepsine oy vermişsin! Kararsız olmayan bir kararsız. 🎉" %}
+    {% include "partials/poll_list.html" with empty_text="Hepsine oy vermişsin. Kararsız olmayan bir kararsız!" %}
   {% else %}
     {% include "partials/poll_list.html" with empty_text="Henüz kimse kararsız değil… İlk sen ol." %}
   {% endif %}

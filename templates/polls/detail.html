@@ -21,7 +21,7 @@
 
     <div data-extra aria-live="polite">
       {% if data %}
-        <p class="verdict"><span aria-hidden="true">{{ data.verdict.emoji }}</span> {{ data.verdict.label }}</p>
+        <p class="verdict">{{ data.verdict.label }}</p>
         <ul class="result-list">
           {% for r in data.results %}
             <li class="result-row opt-{{ r.position }}{% if voted_position == r.position %} is-mine{% endif %}" style="--w: {{ r.percent }}%">
@@ -34,7 +34,7 @@
     </div>
 
     {% if poll.is_closed %}
-      <p class="closed-note"><span aria-hidden="true">🔒</span> Bu anket kapandı. Artık yeni oy almıyor, sonuçlar herkese açık.</p>
+      <p class="closed-note">Bu anket kapandı. Artık yeni oy almıyor, sonuçlar herkese açık.</p>
     {% elif voted_position is None %}
       {% if data %}<p class="muted small" data-owner-note>Bu senin anketin, sonuçları görüyorsun. İstersen sen de oy verebilirsin.</p>{% endif %}
       <form method="post" action="{% url 'poll_vote' code=poll.code %}" class="vote-form" data-vote-form>

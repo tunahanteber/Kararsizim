@@ -3,9 +3,9 @@ from django.db import models
 from django.db.models import Q
 
 LEVELS = {
-    1: ("Biraz kararsız", "🤔"),
-    2: ("Çok kararsız", "😵‍💫"),
-    3: ("Tam bir kararsız", "🌀"),
+    1: "Biraz kararsız",
+    2: "Çok kararsız",
+    3: "Tam bir kararsız",
 }
 
 
@@ -38,11 +38,7 @@ class Poll(models.Model):
 
     @property
     def level_label(self):
-        return LEVELS[self.indecision_level][0]
-
-    @property
-    def level_emoji(self):
-        return LEVELS[self.indecision_level][1]
+        return LEVELS[self.indecision_level]
 
 
 class Option(models.Model):

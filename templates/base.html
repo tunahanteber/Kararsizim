@@ -17,7 +17,7 @@
   <header class="topbar">
     <a class="wordmark" href="/" aria-label="kararsızım">kararsız<span class="wordmark-i">ı</span>m</a>
     <nav class="topnav">
-      <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false" aria-label="Koyu temaya geç"><span data-theme-icon aria-hidden="true">🌙</span></button>
+      <button type="button" class="theme-toggle" data-theme-toggle><span class="label-light">Koyu mod</span><span class="label-dark">Açık mod</span></button>
       {% if user.is_authenticated %}
         <span class="topnav-user">@{{ user.username }}</span>
         <form method="post" action="/cikis/" class="inline-form">{% csrf_token %}<button type="submit" class="link-btn">Çıkış</button></form>
