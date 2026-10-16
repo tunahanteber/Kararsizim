@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 
-Use the project venv (Python 3.14 here, spec says 3.12 — user chose to stay on 3.14; `.python-version` says `3.14`).
+Use the project venv (local venv is Python 3.14; `.python-version` pins 3.13 for Vercel because Vercel's docs only show/guarantee up to 3.13 — spec says 3.12).
 
 ```bash
 .venv/bin/pip install -r requirements.txt
